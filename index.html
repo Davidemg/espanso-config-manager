@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Library</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='28' height='16' x='2' y='8' rx='2' fill='%23000'/><rect width='24' height='2' x='4' y='20' fill='%23fff'/><rect width='2' height='2' x='6' y='12' fill='%23fff'/><rect width='2' height='2' x='10' y='12' fill='%23fff'/><rect width='2' height='2' x='14' y='12' fill='%23fff'/><rect width='2' height='2' x='18' y='12' fill='%23fff'/><rect width='2' height='2' x='22' y='12' fill='%23fff'/><rect width='2' height='2' x='26' y='12' fill='%23fff'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ocean-primary: #0a1428;
+            --ocean-secondary: #1e3a5f;
+            --ocean-accent: #2d5aa0;
+            --ocean-light: #4a90a4;
+            --silver-primary: #c0c5ce;
+            --silver-accent: #dfe1e8;
+            --silver-bright: #ffffff;
+            --glow-blue: #00d4ff;
+            --error-red: #ff4757;
+            --success-green: #2ed573;
+            --warning-yellow: #ffa502;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--ocean-primary) 0%, var(--ocean-secondary) 50%, var(--ocean-accent) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--silver-primary);
+        }
+
+        .glass-panel {
+            background: rgba(30, 58, 95, 0.3);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(192, 197, 206, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 20, 40, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--ocean-accent), var(--ocean-light));
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--silver-bright), var(--glow-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-wrapper:hover {
+            transform: translateY(-2px);
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(45deg, var(--ocean-accent), var(--ocean-light));
+            color: var(--silver-bright);
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .file-input-label:hover {
+            background: linear-gradient(45deg, var(--ocean-light), var(--glow-blue));
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+            border-color: var(--glow-blue);
+        }
+
+        .prompt-card {
+            background: rgba(45, 90, 160, 0.2);
+            border: 1px solid rgba(74, 144, 164, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .prompt-card:hover::before {
+            left: 100%;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--glow-blue);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .trigger-badge {
+            background: linear-gradient(45deg, var(--glow-blue), var(--ocean-light));
+            color: var(--ocean-primary);
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            padding: 0.4rem 0.8rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .replace-content {
+            background: rgba(16, 31, 55, 0.6);
+            border: 1px solid rgba(74, 144, 164, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            color: var(--silver-accent);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .search-box {
+            background: rgba(30, 58, 95, 0.4);
+            border: 2px solid rgba(74, 144, 164, 0.3);
+            border-radius: 50px;
+            color: var(--silver-bright);
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            background: rgba(30, 58, 95, 0.6);
+            border-color: var(--glow-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            color: var(--silver-bright);
+        }
+
+        .search-box::placeholder {
+            color: rgba(192, 197, 206, 0.7);
+        }
+
+        .btn-futuristic {
+            background: linear-gradient(45deg, var(--ocean-accent), var(--ocean-light));
+            color: var(--silver-bright);
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-futuristic:hover {
+            background: linear-gradient(45deg, var(--ocean-light), var(--glow-blue));
+            color: var(--silver-bright);
+            border-color: var(--glow-blue);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .stats-card {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--glow-blue);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--silver-primary);
+            opacity: 0.8;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--ocean-light);
+            margin-bottom: 1rem;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 58, 95, 0.3);
+            border-radius: 4px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: var(--ocean-light);
+            border-radius: 4px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--glow-blue);
+        }
+
+        .grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .trigger-chip {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(74, 144, 164, 0.3));
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trigger-chip::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .trigger-chip:hover::before {
+            transform: scale(1);
+        }
+
+        .trigger-chip:hover {
+            border-color: var(--glow-blue);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .trigger-chip .trigger-text {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--glow-blue);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .custom-toast {
+            background: rgba(30, 58, 95, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--ocean-light);
+            color: var(--silver-bright);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 10px;
+            min-width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-success {
+            border-color: var(--success-green);
+            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
+        }
+
+        .toast-error {
+            border-color: var(--error-red);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .toast-warning {
+            border-color: var(--warning-yellow);
+            box-shadow: 0 5px 15px rgba(255, 165, 2, 0.3);
+        }
+
+        /* Validation Error Styles */
+        .is-invalid {
+            border-color: var(--error-red) !important;
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.3) !important;
+        }
+
+        .invalid-feedback {
+            color: var(--error-red);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Loading Spinner */
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 20, 40, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--ocean-light);
+            border-top-color: var(--glow-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Auto-save indicator */
+        .auto-save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 58, 95, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--ocean-light);
+            border-radius: 25px;
+            padding: 8px 16px;
+            color: var(--silver-bright);
+            font-size: 0.875rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auto-save-indicator.saving {
+            display: flex;
+            border-color: var(--warning-yellow);
+        }
+
+        .auto-save-indicator.saved {
+            display: flex;
+            border-color: var(--success-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Auto-save Indicator -->
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        <i class="bi bi-arrow-repeat spin" id="saveIcon"></i>
+        <span id="saveText">Saving...</span>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="title mb-0">
+                        <i class="bi bi-lightning-charge-fill me-3"></i>
+                        Prompt Library
+                    </h1>
+                    <p class="mb-0 mt-2" style="color: var(--silver-accent); font-size: 1.1rem;">
+                        Espanso Configuration Manager
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="yamlFile" accept=".yml,.yaml" />
+                        <label for="yamlFile" class="file-input-label">
+                            <i class="bi bi-upload"></i>
+                            Load YAML File
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <input type="text" 
+                       id="searchBox" 
+                       class="form-control search-box" 
+                       placeholder="🔍 Search prompts by trigger, content, or description...">
+            </div>
+            <div class="col-md-3">
+                <button id="viewToggle" class="btn btn-futuristic w-100">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+                    <span id="viewToggleText">Grid View</span>
+                </button>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="promptCount">0</div>
+                    <small style="color: var(--silver-primary);">Total Prompts</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4 scrollbar" style="max-height: 70vh; overflow-y: auto;">
+            <div id="promptContainer" class="list-view">
+                <div class="empty-state">
+                    <i class="bi bi-file-earmark-code"></i>
+                    <h3>No Prompts Loaded</h3>
+                    <p>Upload your YAML file to view and manage your espanso prompts</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button id="validateBtn" class="btn btn-futuristic me-3" style="display: none;">
+                <i class="bi bi-check-circle me-2"></i>Validate YAML
+            </button>
+            <button id="exportBtn" class="btn btn-futuristic me-3" style="display: none;">
+                <i class="bi bi-download me-2"></i>Save to File
+            </button>
+            <button id="addPromptBtn" class="btn btn-futuristic" style="display: none;">
+                <i class="bi bi-plus-circle me-2"></i>Add New Prompt
+            </button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Prompt Modal -->
+    <div class="modal fade" id="promptModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: var(--ocean-secondary); border: 1px solid var(--ocean-light);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--ocean-light);">
+                    <h5 class="modal-title" style="color: var(--silver-bright);">
+                        <i class="bi bi-lightning-charge me-2"></i>
+                        <span id="modalTitle">Add New Prompt</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="promptForm">
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--silver-accent);">Trigger <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control search-box" id="triggerInput" placeholder=":example" required>
+                            <div class="invalid-feedback">Trigger is required and must start with a special character (: ; /)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--silver-accent);">Replace Content <span class="text-danger">*</span></label>
+                            <textarea class="form-control search-box" id="replaceInput" rows="8" placeholder="Your prompt content here..." required></textarea>
+                            <div class="invalid-feedback">Replace content is required</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--silver-accent);">Variables (Optional)</label>
+                            <textarea class="form-control search-box" id="varsInput" rows="3" placeholder="YAML format for variables (advanced)"></textarea>
+                            <small class="text-muted" style="color: #fff !important;">For dynamic content like dates, clipboard, etc.</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--ocean-light);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-futuristic" id="savePromptBtn">Save Prompt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script>
+        // Global variables
+        let prompts = [];
+        let currentEditIndex = -1;
+        let isGridView = false;
+        let originalYamlContent = '';
+        let currentFileName = 'base.yml';
+        let hasUnsavedChanges = false;
+
+        // DOM elements
+        const promptContainer = document.getElementById('promptContainer');
+        const promptCount = document.getElementById('promptCount');
+        const searchBox = document.getElementById('searchBox');
+        const yamlFile = document.getElementById('yamlFile');
+        const validateBtn = document.getElementById('validateBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const addPromptBtn = document.getElementById('addPromptBtn');
+        const viewToggle = document.getElementById('viewToggle');
+        const viewToggleText = document.getElementById('viewToggleText');
+        const promptModal = new bootstrap.Modal(document.getElementById('promptModal'));
+        const modalTitle = document.getElementById('modalTitle');
+        const triggerInput = document.getElementById('triggerInput');
+        const replaceInput = document.getElementById('replaceInput');
+        const varsInput = document.getElementById('varsInput');
+        const savePromptBtn = document.getElementById('savePromptBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const toastContainer = document.getElementById('toastContainer');
+        const autoSaveIndicator = document.getElementById('autoSaveIndicator');
+        const saveIcon = document.getElementById('saveIcon');
+        const saveText = document.getElementById('saveText');
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `custom-toast toast-${type}`;
+            
+            const icon = {
+                'success': 'check-circle-fill',
+                'error': 'exclamation-triangle-fill',
+                'warning': 'exclamation-circle-fill',
+                'info': 'info-circle-fill'
+            }[type];
+
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${icon} me-3" style="font-size: 1.5rem;"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Show/hide loading spinner
+        function setLoading(show) {
+            loadingSpinner.style.display = show ? 'flex' : 'none';
+        }
+
+        // Validate trigger format
+        function validateTrigger(trigger) {
+            if (!trigger || trigger.trim() === '') {
+                return { valid: false, message: 'Trigger cannot be empty' };
+            }
+            
+            // Check if trigger starts with special character
+            const validPrefixes = [':', ';', '/'];
+            const hasValidPrefix = validPrefixes.some(prefix => trigger.startsWith(prefix));
+            
+            if (!hasValidPrefix) {
+                return { valid: false, message: 'Trigger must start with : ; or /' };
+            }
+            
+            // Check for spaces in trigger
+            if (trigger.includes(' ')) {
+                return { valid: false, message: 'Trigger cannot contain spaces' };
+            }
+            
+            // Check for duplicate triggers
+            const isDuplicate = prompts.some((prompt, index) => 
+                prompt.trigger === trigger && index !== currentEditIndex
+            );
+            
+            if (isDuplicate) {
+                return { valid: false, message: 'This trigger already exists' };
+            }
+            
+            return { valid: true };
+        }
+
+        // Validate YAML content
+        function validateYamlContent(content) {
+            try {
+                const parsed = jsyaml.load(content);
+                
+                if (!parsed || typeof parsed !== 'object') {
+                    throw new Error('Invalid YAML structure');
+                }
+                
+                if (!parsed.matches) {
+                    throw new Error('YAML must contain a "matches" array');
+                }
+                
+                if (!Array.isArray(parsed.matches)) {
+                    throw new Error('"matches" must be an array');
+                }
+                
+                // Validate each match
+                parsed.matches.forEach((match, index) => {
+                    if (!match.trigger && !match.regex) {
+                        throw new Error(`Match at index ${index} must have "trigger" or "regex" field`);
+                    }
+                    
+                    if (!match.replace) {
+                        throw new Error(`Match at index ${index} must have "replace" field`);
+                    }
+                    
+                    if (match.trigger) {
+                        const validation = validateTrigger(match.trigger);
+                        if (!validation.valid) {
+                            throw new Error(`Match at index ${index}: ${validation.message}`);
+                        }
+                    }
+                });
+                
+                return { valid: true, data: parsed };
+            } catch (error) {
+                return { valid: false, error: error.message };
+            }
+        }
+
+        // File upload handler with enhanced error handling
+        yamlFile.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check file size (limit to 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('File is too large. Maximum size is 10MB.', 'error');
+                e.target.value = '';
+                return;
+            }
+            
+            // Check file extension
+            const validExtensions = ['.yml', '.yaml'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            if (!validExtensions.includes(fileExtension)) {
+                showToast('Invalid file type. Please upload a .yml or .yaml file.', 'error');
+                e.target.value = '';
+                return;
+            }
+            
+            setLoading(true);
+            currentFileName = file.name;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    originalYamlContent = e.target.result;
+                    const validation = validateYamlContent(originalYamlContent);
+                    
+                    if (!validation.valid) {
+                        showToast(`YAML validation failed: ${validation.error}`, 'error');
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    prompts = validation.data.matches;
+                    hasUnsavedChanges = false;
+                    renderPrompts();
+                    
+                    // Show action buttons
+                    validateBtn.style.display = 'inline-block';
+                    exportBtn.style.display = 'inline-block';
+                    addPromptBtn.style.display = 'inline-block';
+                    
+                    showToast(`Successfully loaded ${prompts.length} prompts from ${currentFileName}`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error parsing YAML:', error);
+                    showToast(`Error parsing YAML file: ${error.message}`, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            reader.onerror = function() {
+                showToast('Error reading file. Please try again.', 'error');
+                setLoading(false);
+            };
+            
+            reader.readAsText(file);
+        });
+
+        // Validate YAML button
+        validateBtn.addEventListener('click', function() {
+            const yamlContent = generateYamlContent();
+            const validation = validateYamlContent(yamlContent);
+            
+            if (validation.valid) {
+                showToast('YAML validation passed! All prompts are valid.', 'success');
+            } else {
+                showToast(`Validation failed: ${validation.error}`, 'error');
+            }
+        });
+
+        // Generate YAML content from current prompts
+        function generateYamlContent() {
+            try {
+                // Preserve other YAML properties if they exist
+                let yamlData = { matches: prompts };
+                
+                if (originalYamlContent) {
+                    try {
+                        const originalData = jsyaml.load(originalYamlContent);
+                        // Preserve other top-level properties
+                        Object.keys(originalData).forEach(key => {
+                            if (key !== 'matches') {
+                                yamlData[key] = originalData[key];
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Could not preserve original YAML structure:', e);
+                    }
+                }
+                
+                return jsyaml.dump(yamlData, {
+                    indent: 2,
+                    lineWidth: -1,
+                    quotingType: '"',
+                    forceQuotes: false,
+                    styles: {
+                        '!!str': 'literal'
+                    }
+                });
+            } catch (error) {
+                console.error('Error generating YAML:', error);
+                showToast('Error generating YAML content', 'error');
+                return '';
+            }
+        }
+
+        // Export YAML with error handling
+        exportBtn.addEventListener('click', function() {
+            try {
+                const yamlContent = generateYamlContent();
+                
+                if (!yamlContent) {
+                    showToast('Failed to generate YAML content', 'error');
+                    return;
+                }
+                
+                const blob = new Blob([yamlContent], { type: 'text/yaml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentFileName || 'espanso-config.yml';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast(`Exported ${prompts.length} prompts to ${a.download}`, 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Failed to export YAML file', 'error');
+            }
+        });
+
+        // Save to file (simulated - in a real app, this would save to disk)
+        // Removed the saveBtn.addEventListener('click', async function() { ... });
+
+        // Search functionality with debouncing
+        let searchTimeout;
+        searchBox.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                renderPrompts(this.value.toLowerCase());
+            }, 300);
+        });
+
+        // View toggle
+        viewToggle.addEventListener('click', function() {
+            isGridView = !isGridView;
+            promptContainer.className = isGridView ? 'grid-view' : 'list-view';
+            viewToggleText.innerHTML = isGridView ? 
+                '<i class="bi bi-list-ul me-2"></i>List View' : 
+                '<i class="bi bi-grid-3x3-gap-fill me-2"></i>Grid View';
+            renderPrompts();
+        });
+
+        // Add new prompt
+        addPromptBtn.addEventListener('click', function() {
+            currentEditIndex = -1;
+            modalTitle.textContent = 'Add New Prompt';
+            triggerInput.value = '';
+            replaceInput.value = '';
+            varsInput.value = '';
+            clearValidation();
+            promptModal.show();
+        });
+
+        // Clear validation states
+        function clearValidation() {
+            triggerInput.classList.remove('is-invalid');
+            replaceInput.classList.remove('is-invalid');
+        }
+
+        // Save prompt with validation
+        savePromptBtn.addEventListener('click', function() {
+            clearValidation();
+            
+            const trigger = triggerInput.value.trim();
+            const replace = replaceInput.value.trim();
+            const vars = varsInput.value.trim();
+            
+            let hasErrors = false;
+            
+            // Validate trigger
+            const triggerValidation = validateTrigger(trigger);
+            if (!triggerValidation.valid) {
+                triggerInput.classList.add('is-invalid');
+                triggerInput.nextElementSibling.textContent = triggerValidation.message;
+                hasErrors = true;
+            }
+            
+            // Validate replace content
+            if (!replace) {
+                replaceInput.classList.add('is-invalid');
+                hasErrors = true;
+            }
+            
+            if (hasErrors) {
+                showToast('Please fix the validation errors', 'error');
+                return;
+            }
+            
+            // Validate vars if provided
+            if (vars) {
+                try {
+                    const parsedVars = jsyaml.load(vars);
+                    if (!Array.isArray(parsedVars)) {
+                        throw new Error('Variables must be an array');
+                    }
+                } catch (error) {
+                    showToast(`Invalid variables format: ${error.message}`, 'error');
+                    return;
+                }
+            }
+            
+            try {
+                const promptData = { trigger, replace };
+                
+                // Add vars if provided
+                if (vars) {
+                    promptData.vars = jsyaml.load(vars);
+                }
+                
+                if (currentEditIndex >= 0) {
+                    prompts[currentEditIndex] = promptData;
+                    showToast('Prompt updated successfully', 'success');
+                } else {
+                    prompts.push(promptData);
+                    showToast('New prompt added successfully', 'success');
+                }
+                
+                hasUnsavedChanges = true;
+                renderPrompts();
+                promptModal.hide();
+                
+            } catch (error) {
+                console.error('Error saving prompt:', error);
+                showToast('Failed to save prompt', 'error');
+            }
+        });
+
+        // Render prompts with error handling
+        function renderPrompts(searchTerm = '') {
+            try {
+                let filteredPrompts = prompts;
+                
+                if (searchTerm) {
+                    filteredPrompts = prompts.filter(prompt => 
+                        (prompt.trigger && prompt.trigger.toLowerCase().includes(searchTerm)) ||
+                        (prompt.replace && prompt.replace.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                promptCount.textContent = filteredPrompts.length;
+                
+                if (filteredPrompts.length === 0) {
+                    promptContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="bi bi-search"></i>
+                            <h3>${searchTerm ? 'No Matching Prompts' : 'No Prompts Found'}</h3>
+                            <p>${searchTerm ? 'Try adjusting your search terms' : 'Upload your YAML file to get started'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (isGridView) {
+                    promptContainer.innerHTML = filteredPrompts.map((prompt, index) => {
+                        const originalIndex = prompts.indexOf(prompt);
+                        return `
+                            <div class="trigger-chip fade-in" onclick="editPrompt(${originalIndex})">
+                                <div class="trigger-text">${escapeHtml(prompt.trigger || 'No trigger')}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    promptContainer.innerHTML = filteredPrompts.map((prompt, index) => {
+                        const originalIndex = prompts.indexOf(prompt);
+                        const replaceContent = prompt.replace || '';
+                        const isMultiline = typeof replaceContent === 'string' && replaceContent.includes('\n');
+                        const previewContent = isMultiline 
+                            ? replaceContent.split('\n').slice(0, 3).join('\n') + (replaceContent.split('\n').length > 3 ? '\n...' : '')
+                            : replaceContent;
+                        
+                        const hasVars = prompt.vars && prompt.vars.length > 0;
+                        
+                        return `
+                            <div class="prompt-card fade-in">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="trigger-badge">${escapeHtml(prompt.trigger || 'No trigger')}</div>
+                                        ${hasVars ? '<span class="badge bg-info ms-2">Dynamic</span>' : ''}
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-light me-2" onclick="editPrompt(${originalIndex})" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning me-2" onclick="duplicatePrompt(${originalIndex})" title="Duplicate">
+                                            <i class="bi bi-files"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePrompt(${originalIndex})" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="replace-content">${escapeHtml(previewContent)}</div>
+                                ${isMultiline ? `<small class="text-muted mt-2 d-block"><i class="bi bi-eye"></i> Click edit to view full content</small>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error rendering prompts:', error);
+                showToast('Error displaying prompts', 'error');
+            }
+        }
+
+        // Edit prompt
+        function editPrompt(index) {
+            if (index < 0 || index >= prompts.length) {
+                showToast('Invalid prompt index', 'error');
+                return;
+            }
+            
+            currentEditIndex = index;
+            const prompt = prompts[index];
+            modalTitle.textContent = 'Edit Prompt';
+            triggerInput.value = prompt.trigger || '';
+            replaceInput.value = prompt.replace || '';
+            varsInput.value = prompt.vars ? jsyaml.dump(prompt.vars).trim() : '';
+            clearValidation();
+            promptModal.show();
+        }
+
+        // Duplicate prompt
+        function duplicatePrompt(index) {
+            if (index < 0 || index >= prompts.length) {
+                showToast('Invalid prompt index', 'error');
+                return;
+            }
+            
+            const prompt = prompts[index];
+            const newPrompt = JSON.parse(JSON.stringify(prompt));
+            
+            // Generate unique trigger
+            let counter = 1;
+            let newTrigger = `${prompt.trigger}_copy`;
+            while (prompts.some(p => p.trigger === newTrigger)) {
+                newTrigger = `${prompt.trigger}_copy${counter}`;
+                counter++;
+            }
+            newPrompt.trigger = newTrigger;
+            
+            prompts.push(newPrompt);
+            hasUnsavedChanges = true;
+            renderPrompts();
+            showToast(`Duplicated prompt with trigger: ${newTrigger}`, 'success');
+        }
+
+        // Delete prompt with confirmation
+        function deletePrompt(index) {
+            if (index < 0 || index >= prompts.length) {
+                showToast('Invalid prompt index', 'error');
+                return;
+            }
+            
+            const prompt = prompts[index];
+            if (confirm(`Are you sure you want to delete the prompt "${prompt.trigger}"?`)) {
+                prompts.splice(index, 1);
+                hasUnsavedChanges = true;
+                renderPrompts();
+                showToast('Prompt deleted successfully', 'success');
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        // Warn before leaving if there are unsaved changes
+        window.addEventListener('beforeunload', function(e) {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S to save
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (exportBtn.style.display !== 'none') {
+                    exportBtn.click();
+                }
+            }
+            
+            // Ctrl+N to add new prompt
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                if (addPromptBtn.style.display !== 'none') {
+                    addPromptBtn.click();
+                }
+            }
+            
+            // Escape to close modal
+            if (e.key === 'Escape' && promptModal._isShown) {
+                promptModal.hide();
+            }
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+</body>
+</html>
